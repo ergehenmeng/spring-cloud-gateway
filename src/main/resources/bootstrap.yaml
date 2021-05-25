@@ -1,0 +1,37 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lower-case-service-id: true
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            maxAge: 180000
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowCredentials: true
+            allowedHeaders: "*"
+      default-filters: ## 默认过滤器?
+        - name: RequestRateLimiter
+          args:
+            key-resolver: '#{@hostAddrKeyResolver}'
+            redis-rate-limiter:
+              replenish-rate: 100
+              burst-capacity: 100
+      routes:
+        - id: spring-cloud-custom
+          uri: lb://spring-cloud-custom
+          predicates:
+            - Path=
+              /receviceMsg/**
+          filters:
+            - StripPrefix=1
+        - id: spring-cloud-producer
+          uri: lb://spring-cloud-producer
+          predicates:
+            - Path=
+              /sendMsg/**,
+          filters:
+            - StripPrefix=1
